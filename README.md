@@ -5,10 +5,10 @@
 
 1. Set Up the Project:
 
-mkdir prospero-bot
-cd prospero-bot
-python3 -m venv prospero_bot_env
-source prospero_bot_env/bin/activate
+mkdir woola-bot
+cd woola-bot
+python3 -m venv woola_bot_env
+source woola_bot_env/bin/activate
 
 2. Create requirements.txt:
 
@@ -29,8 +29,8 @@ deactivate
 
 ############# Project architecture ##################
 
-prospero-bot/
-├── prospero_bot_env/          # Virtual environment directory
+woola-bot/
+├── woola_bot_env/          # Virtual environment directory
 ├── data/                      # Directory for storing data files
 │   └── market_data.csv
 ├── logs/                      # Directory for log files
