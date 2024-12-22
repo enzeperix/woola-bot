@@ -3,6 +3,7 @@
 import os
 import requests
 import argparse
+from utils.file_utils import extract_all_gz_in_dir
 
 def download_bybit_csv(pair, year, timeframes, root_dir="../data"):
     """
