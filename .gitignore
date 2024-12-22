@@ -4,6 +4,6 @@ data/
 # Ignore virtual environments
 venv/
 .env/
-
+woola_bot_env/
 # Ignore logs
 logs/
