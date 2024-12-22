@@ -1,0 +1,9 @@
+# Ignore the data directory
+data/
+
+# Ignore virtual environments
+venv/
+.env/
+
+# Ignore logs
+logs/
