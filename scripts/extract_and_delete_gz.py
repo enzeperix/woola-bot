@@ -19,3 +19,7 @@ if __name__ == "__main__":
     print(f"Extracting all .csv.gz files in {directory}...")
     extract_all_gz_in_dir(directory)
     print(f"Extraction complete. All .gz files removed.")
+
+
+# Usage : python3 scripts/extract_and_delete_gz.py --dir data/bybit_data/SOLUSDT/1m-timeframe/
+

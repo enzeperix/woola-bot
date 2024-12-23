@@ -44,3 +44,10 @@ woola-bot/
 └── README.md                  # Project documentation
 
 
+Directory listing for /kline_for_metatrader4/ with ByBit candle data:
+https://public.bybit.com/kline_for_metatrader4/
+Data has the following OHLCV format :
+
+column1                            column2           column3             column4           column5         column6
+Time yyyy.MM.dd（UTC+3）            Open price       Highest price       Lowest price      Close price     Trade volume
+                                   
