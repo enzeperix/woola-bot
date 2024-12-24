@@ -3,4 +3,5 @@ numpy
 requests
 matplotlib
 ccxt
+beautifulsoup4
 
