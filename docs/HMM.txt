@@ -1,0 +1,55 @@
+# HIDDEN MARKOV MODELS
+
+ideas -
+- watch a couple Jim Simons vids on HMMS
+- large vs small avg trade size
+- look into Jim's regimes and make those the states that are predicted
+- maybe put liquidations in there ... these could be good to help identify point of capitulation upward or down..
+- open interest, funding rates
+- THe masks could be used to backtest strategies. For example you might want to see how a particular trading strategy performs 
+only during periods identified as "state 1".
+- You could look at state-specific metrics like "What's the average daily return when we're in state 2?"
+- In live trading, identifying the current state could trigger different trading rules or risk management strategies. 
+
+HMMS can predict hidden states and market regimes...
+
+Here's a concise bullet point list to help you understand and remember how Hidden Markov Models (HMMs) work for identifying market regimes in trading algorithms:
+
+HMMs assume markets have hidden states (regimes) that we can't directly observe
+These hidden states influence observable market features (price, volume, etc.)
+
+Key components of HMMs:
+Hidden states: Different market regimes (e.g., bull, bear, sideways)
+Observable features: Market data we can measure
+Transition probabilities: Likelihood of moving between states
+Emission probabilities: Likelihood of observing certain data in each state
+
+HMM process for trading:
+Define possible market regimes (hidden states)
+Select relevant observable features
+Train the model on historical data
+Use the model to infer current market regime
+Make trading decisions based on the inferred regime
+
+Benefits of HMMs:
+Can capture complex market dynamics
+Adapt to changing market conditions
+Provide probabilistic framework for decision-making
+
+Applications in trading:
+Asset allocation
+Risk management
+Entry/exit timing
+Portfolio rebalancing
+
+Considerations:
+Regime definitions are subjective
+Requires careful feature selection
+Performance depends on quality of training data
+Need to regularly retrain the model
+Remember, HMMs help you "see" the invisible market regimes by analyzing patterns in observable data, allowing you to adjust your trading strategy accordingly.
+video study
+https://www.youtube.com/watch?v=bDRtjBsxing
+- HMM based on sentiment, but where do we get sentiment
+maybe the fear and greed index
+he shows that a HMM is 10x better than random but the RNN is 2x better than HMM... not necessarily holding true.

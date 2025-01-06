@@ -4,4 +4,6 @@ requests
 matplotlib
 ccxt
 beautifulsoup4
-
+scikit-learn
+tensorflow
+logging

@@ -1,0 +1,2 @@
+- Build OHLCV data based on natural patterns and golden ratios like Fibbonacci sequences. 
+  Example: Redefine OHLCV timeframes  from 1m, 5m, 15m, 30m, 60m to 1m, 2m, 3m, 5m, 8m, 13m, 21m, 34m, 55m etc. (Fib numbers)
