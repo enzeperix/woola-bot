@@ -1,3 +1,17 @@
+def calculate_mid_prices(df):
+    """
+    Adds mid-price columns to the DataFrame.
+    Args:
+        df (pd.DataFrame): DataFrame containing OHLCV data.
+    Returns:
+        pd.DataFrame: DataFrame with mid-price columns added.
+    """
+    df['mid_price_1'] = (df['high'] + df['low']) / 2
+    df['mid_price_2'] = (df['open'] + df['close']) / 2
+    return df
+
+
+
 def generate_expanded_differences(df, lags=[1, 2, 3, 5, 8]):
     """
     Generates a comprehensive set of differences and lagged factors for price components and volume.
