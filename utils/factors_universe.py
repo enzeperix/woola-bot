@@ -27,44 +27,48 @@ def generate_expanded_differences(df, lags=[1, 2, 3, 5, 8]):
     Returns:
         pd.DataFrame: DataFrame with additional expanded difference factors.
     """
-    feature_df = pd.DataFrame(index=df.index)  # Temporary DataFrame for features
+    feature_dict = {}  # Dictionary to store new features. (temporary dictionary)
     # Static factors (immediate differences within the same row)
-    feature_df['high_minus_low'] = df['high'] - df['low']
-    feature_df['close_minus_open'] = df['close'] - df['open']
+    feature_dict['high_minus_low'] = df['high'] - df['low']
+    feature_dict['close_minus_open'] = df['close'] - df['open']
     # Lagged differences for price components and volume
     for lag in lags:
         # Price component differences
-        feature_df[f'high_minus_high_lag_{lag}'] = df['high'] - df['high'].shift(lag)
-        feature_df[f'low_minus_low_lag_{lag}'] = df['low'] - df['low'].shift(lag)
-        feature_df[f'open_minus_open_lag_{lag}'] = df['open'] - df['open'].shift(lag)
-        feature_df[f'close_minus_close_lag_{lag}'] = df['close'] - df['close'].shift(lag)
+        feature_dict[f'high_minus_high_lag_{lag}'] = df['high'] - df['high'].shift(lag)
+        feature_dict[f'low_minus_low_lag_{lag}'] = df['low'] - df['low'].shift(lag)
+        feature_dict[f'open_minus_open_lag_{lag}'] = df['open'] - df['open'].shift(lag)
+        feature_dict[f'close_minus_close_lag_{lag}'] = df['close'] - df['close'].shift(lag)
         # Volume differences
-        feature_df[f'volume_minus_volume_lag_{lag}'] = df['volume'] - df['volume'].shift(lag)
+        feature_dict[f'volume_minus_volume_lag_{lag}'] = df['volume'] - df['volume'].shift(lag)
         # Differences between price components across time
-        feature_df[f'high_minus_close_lag_{lag}'] = df['high'] - df['close'].shift(lag)
-        feature_df[f'low_minus_open_lag_{lag}'] = df['low'] - df['open'].shift(lag)
-        feature_df[f'close_minus_high_lag_{lag}'] = df['close'] - df['high'].shift(lag)
-        feature_df[f'open_minus_low_lag_{lag}'] = df['open'] - df['low'].shift(lag)
+        feature_dict[f'high_minus_close_lag_{lag}'] = df['high'] - df['close'].shift(lag)
+        feature_dict[f'low_minus_open_lag_{lag}'] = df['low'] - df['open'].shift(lag)
+        feature_dict[f'close_minus_high_lag_{lag}'] = df['close'] - df['high'].shift(lag)
+        feature_dict[f'open_minus_low_lag_{lag}'] = df['open'] - df['low'].shift(lag)
         # Absolute differences (magnitude-only changes)
-        feature_df[f'abs_high_minus_high_lag_{lag}'] = abs(df['high'] - df['high'].shift(lag))
-        feature_df[f'abs_close_minus_close_lag_{lag}'] = abs(df['close'] - df['close'].shift(lag))
+        feature_dict[f'abs_high_minus_high_lag_{lag}'] = abs(df['high'] - df['high'].shift(lag))
+        feature_dict[f'abs_close_minus_close_lag_{lag}'] = abs(df['close'] - df['close'].shift(lag))
         # Differences of differences (acceleration or deceleration)
-        feature_df[f'diff_of_diff_close_lag_{lag}'] = df['close'].diff().diff(periods=lag)
-        feature_df[f'diff_of_diff_volume_lag_{lag}'] = df['volume'].diff().diff(periods=lag)
+        feature_dict[f'diff_of_diff_close_lag_{lag}'] = df['close'].diff().diff(periods=lag)
+        feature_dict[f'diff_of_diff_volume_lag_{lag}'] = df['volume'].diff().diff(periods=lag)
         # Volume-normalized differences
-        feature_df[f'close_diff_normalized_lag_{lag}'] = np.where(df['volume'] != 0,
+        feature_dict[f'close_diff_normalized_lag_{lag}'] = np.where(df['volume'] != 0,
                                                           (df['close'] - df['close'].shift(lag)) / df['volume'], 0)
         # Range-based differences
-        feature_df[f'close_minus_range_lag_{lag}'] = df['close'] - (df['high'] - df['low']).shift(lag)
+        feature_dict[f'close_minus_range_lag_{lag}'] = df['close'] - (df['high'] - df['low']).shift(lag)
         # Directional indicators
-        feature_df[f'direction_close_lag_{lag}'] = np.sign(df['close'] - df['close'].shift(lag))
-        feature_df[f'direction_high_lag_{lag}'] = np.sign(df['high'] - df['high'].shift(lag))
-        feature_df[f'direction_volume_lag_{lag}'] = np.sign(df['volume'] - df['volume'].shift(lag))
+        feature_dict[f'direction_close_lag_{lag}'] = np.sign(df['close'] - df['close'].shift(lag))
+        feature_dict[f'direction_high_lag_{lag}'] = np.sign(df['high'] - df['high'].shift(lag))
+        feature_dict[f'direction_volume_lag_{lag}'] = np.sign(df['volume'] - df['volume'].shift(lag))
         # Composite differences
-        feature_df[f'composite_high_low_diff_lag_{lag}'] = (df['high'] - df['low']) - (df['high'].shift(lag) - df['low'].shift(lag))
-        feature_df[f'composite_open_close_diff_lag_{lag}'] = (df['open'] - df['close']) - (df['open'].shift(lag) - df['close'].shift(lag))
-    # Merge features back into the original DataFrame
-    df = pd.concat([df, feature_df], axis=1)
+        feature_dict[f'composite_high_low_diff_lag_{lag}'] = (df['high'] - df['low']) - (df['high'].shift(lag) - df['low'].shift(lag))
+        feature_dict[f'composite_open_close_diff_lag_{lag}'] = (df['open'] - df['close']) - (df['open'].shift(lag) - df['close'].shift(lag))
+
+    # Convert feature_dict to DataFrame
+    feature_df = pd.DataFrame(feature_dict)
+    # Concatenate (merge) features back into the original DataFrame
+    df = pd.concat([df, feature_df], axis=1)   
+
     # Handle missing values (introduced by lagging)
     df.fillna(0, inplace=True)
 
@@ -82,54 +86,62 @@ def generate_ratios(df, lags=[1, 2, 3, 5, 8], imputation_method='default'):
     Returns:
         pd.DataFrame: DataFrame with additional ratio features.
     """
-    feature_df = pd.DataFrame(index=df.index)  # Temporary DataFrame for features
+    feature_dict = {}  # Dictionary to store new features. (temporary dictionary)
     # --- Basic Ratios ---
-    feature_df['high_low_ratio'] = np.where(df['low'] != 0, df['high'] / df['low'], 1)
-    feature_df['close_open_ratio'] = np.where(df['open'] != 0, df['close'] / df['open'], 1)
-    feature_df['high_close_ratio'] = np.where(df['close'] != 0, df['high'] / df['close'], 1)
-    feature_df['low_close_ratio'] = np.where(df['close'] != 0, df['low'] / df['close'], 1)
-    feature_df['open_close_ratio'] = np.where(df['close'] != 0, df['open'] / df['close'], 1)
+    feature_dict['high_low_ratio'] = np.where(df['low'] != 0, df['high'] / df['low'], 1)
+    feature_dict['close_open_ratio'] = np.where(df['open'] != 0, df['close'] / df['open'], 1)
+    feature_dict['high_close_ratio'] = np.where(df['close'] != 0, df['high'] / df['close'], 1)
+    feature_dict['low_close_ratio'] = np.where(df['close'] != 0, df['low'] / df['close'], 1)
+    feature_dict['open_close_ratio'] = np.where(df['close'] != 0, df['open'] / df['close'], 1)
     # --- Range Ratios ---
-    feature_df['range_ratio'] = np.where(df['close'] != 0, (df['high'] - df['low']) / df['close'], 0)
-    feature_df['volume_range_ratio'] = np.where((df['high'] - df['low']) != 0, df['volume'] / (df['high'] - df['low']), 0)
-    feature_df['average_price_ratio'] = np.where(df['close'] != 0, (df['open'] + df['high'] + df['low'] + df['close']) / 4 / df['close'], 1)
+    feature_dict['range_ratio'] = np.where(df['close'] != 0, (df['high'] - df['low']) / df['close'], 0)
+    feature_dict['volume_range_ratio'] = np.where((df['high'] - df['low']) != 0, df['volume'] / (df['high'] - df['low']), 0)
+    feature_dict['average_price_ratio'] = np.where(df['close'] != 0, (df['open'] + df['high'] + df['low'] + df['close']) / 4 / df['close'], 1)
     # --- Enhanced Ratios ---
     # Mid-Price Ratios
-    feature_df['mid_price_to_close_ratio'] = np.where(df['close'] != 0, ((df['high'] + df['low']) / 2) / df['close'], 1)
-    feature_df['mid_price_to_range_ratio'] = np.where((df['high'] - df['low']) != 0, ((df['high'] + df['low']) / 2) / (df['high'] - df['low']), 0) 
+    feature_dict['mid_price_to_close_ratio'] = np.where(df['close'] != 0, ((df['high'] + df['low']) / 2) / df['close'], 1)
+    feature_dict['mid_price_to_range_ratio'] = np.where((df['high'] - df['low']) != 0, ((df['high'] + df['low']) / 2) / (df['high'] - df['low']), 0) 
     # Range-Adjusted Ratios
-    feature_df['adjusted_high_low_ratio'] = np.where((df['high'] + df['low']) != 0, (df['high'] - df['low']) / (df['high'] + df['low']), 0)
+    feature_dict['adjusted_high_low_ratio'] = np.where((df['high'] + df['low']) != 0, (df['high'] - df['low']) / (df['high'] + df['low']), 0)
     # Volatility Ratios
-    feature_df['range_to_avg_price_ratio'] = np.where(((df['high'] + df['low'] + df['open'] + df['close']) / 4) != 0, 
+    feature_dict['range_to_avg_price_ratio'] = np.where(((df['high'] + df['low'] + df['open'] + df['close']) / 4) != 0, 
                                               (df['high'] - df['low']) / ((df['high'] + df['low'] + df['open'] + df['close']) / 4), 
                                               0)
-    feature_df['close_fluctuation_ratio'] = np.where(df['close'].shift(1) != 0, 
+    feature_dict['close_fluctuation_ratio'] = np.where(df['close'].shift(1) != 0, 
                                              abs(df['close'] - df['close'].shift(1)) / df['close'].shift(1), 
                                              0)
-    feature_df['open_fluctuation_ratio'] = np.where(df['open'].shift(1) != 0, 
+    feature_dict['open_fluctuation_ratio'] = np.where(df['open'].shift(1) != 0, 
                                             abs(df['open'] - df['open'].shift(1)) / df['open'].shift(1), 
                                             0)
     # Volume Ratios
-    feature_df['volume_to_avg_price_ratio'] = np.where(((df['high'] + df['low'] + df['open'] + df['close']) / 4) != 0, 
+    feature_dict['volume_to_avg_price_ratio'] = np.where(((df['high'] + df['low'] + df['open'] + df['close']) / 4) != 0, 
                                                df['volume'] / ((df['high'] + df['low'] + df['open'] + df['close']) / 4), 
                                                0)
-    feature_df['volume_to_mid_price_ratio'] = np.where(((df['high'] + df['low']) / 2) != 0, df['volume'] / ((df['high'] + df['low']) / 2), 0)
-    feature_df['volume_change_ratio'] = np.where(df['volume'].shift(1) != 0, abs(df['volume'] - df['volume'].shift(1)) / df['volume'].shift(1), 0)
+    feature_dict['volume_to_mid_price_ratio'] = np.where(((df['high'] + df['low']) / 2) != 0, df['volume'] / ((df['high'] + df['low']) / 2), 0)
+    feature_dict['volume_change_ratio'] = np.where(df['volume'].shift(1) != 0, abs(df['volume'] - df['volume'].shift(1)) / df['volume'].shift(1), 0)
     # Momentum Ratios
-    feature_df['momentum_high_low_ratio'] = np.where(df['high'].shift(1) != 0, (df['high'] - df['low']) / df['high'].shift(1), 0)
-    feature_df['momentum_close_open_ratio'] = np.where(df['open'].shift(1) != 0, (df['close'] - df['open']) / df['open'].shift(1), 0)
+    feature_dict['momentum_high_low_ratio'] = np.where(df['high'].shift(1) != 0, (df['high'] - df['low']) / df['high'].shift(1), 0)
+    feature_dict['momentum_close_open_ratio'] = np.where(df['open'].shift(1) != 0, (df['close'] - df['open']) / df['open'].shift(1), 0)
+
     # --- Lagged Ratios ---
-    for lag in lags:
-        for col in feature_df.columns:
-                feature_df[f'{col}_lag_{lag}'] = feature_df[col].shift(lag)
-    # Merge features back into the original DataFrame
-    df = pd.concat([df, feature_df], axis=1)
+    for col in list(feature_dict.keys()):  # Use a snapshot of the keys
+        for lag in lags:
+            feature_dict[f'{col}_lag_{lag}'] = pd.Series(feature_dict[col]).shift(lag)
+
+    # Convert feature_dict to DataFrame
+    feature_df = pd.DataFrame(feature_dict)
+
     # --- Handle Missing Values ---
     if imputation_method == 'ffill':
-        df.fillna(method='ffill', inplace=True)
+        feature_df.fillna(method='ffill', inplace=True)
+    elif imputation_method == 'interpolate':
+        feature_df.interpolate(method='linear', inplace=True)
     else:  # Default to neutral values
-        df.replace([np.inf, -np.inf], 0, inplace=True)
-        df.fillna(0, inplace=True)
+        feature_df.replace([np.inf, -np.inf], 0, inplace=True)
+        feature_df.fillna(0, inplace=True)
+
+    # Merge ratio features back into the original DataFrame
+    df = pd.concat([df, feature_df], axis=1)
 
     return df
 
@@ -148,73 +160,76 @@ def generate_pairwise_operations(df, lags=[1, 2, 3, 5, 8], rolling_windows=[3, 5
     Returns:
         pd.DataFrame: DataFrame with additional pairwise operation features, their lags, and rolling statistics.
     """
-    feature_df = pd.DataFrame(index=df.index)  # Temporary DataFrame for features
+    feature_dict = {}  # Dictionary to store new features. (temporary dictionary)
+    try:
+        # --- Price Gaps ---
+        feature_dict['open_to_high_gap'] = df['high'] - df['open']
+        feature_dict['close_to_low_gap'] = df['close'] - df['low']
+        feature_dict['open_to_low_gap'] = df['open'] - df['low']
+        feature_dict['close_to_high_gap'] = df['high'] - df['close']
+    
+        # --- Mid-Price Analysis ---
+        feature_dict['mid_price_1'] = (df['high'] + df['low']) / 2
+        feature_dict['mid_price_2'] = (df['open'] + df['close']) / 2
+        feature_dict['mid_price_difference'] = feature_dict['mid_price_1'] - feature_dict['mid_price_2']
+    
+        # --- Skewness in Price Movement ---
+        feature_dict['high_minus_mid_price_1'] = df['high'] - feature_dict['mid_price_1']
+        feature_dict['low_minus_mid_price_1'] = df['low'] - feature_dict['mid_price_1']
+        feature_dict['close_minus_mid_price_2'] = df['close'] - feature_dict['mid_price_2']
+        feature_dict['open_minus_mid_price_2'] = df['open'] - feature_dict['mid_price_2']
+    
+        # --- Average Price Analysis ---
+        feature_dict['average_price'] = (df['open'] + df['high'] + df['low'] + df['close']) / 4
+        feature_dict['average_price_to_close_gap'] = feature_dict['average_price'] - df['close']
+        feature_dict['average_price_to_open_gap'] = feature_dict['average_price'] - df['open']
+    
+        # --- Range-Based Features ---
+        feature_dict['price_range'] = df['high'] - df['low']
+        feature_dict['range_to_open_gap'] = feature_dict['price_range'] - (df['open'] - df['low'])
+        feature_dict['range_to_close_gap'] = feature_dict['price_range'] - (df['high'] - df['close'])
+    
+        # --- Directional Skewness ---
+        feature_dict['directional_skew_open'] = np.where(feature_dict['price_range'] != 0, (df['open'] - df['low']) / feature_dict['price_range'], 0)
+        feature_dict['directional_skew_close'] = np.where(feature_dict['price_range'] != 0, (df['close'] - df['low']) / feature_dict['price_range'], 0)
+    
+        # --- Relative Strength Indicators ---
+        feature_dict['strength_open_vs_close'] = np.where(df['close'] != 0, df['open'] / df['close'], 1)
+        feature_dict['strength_high_vs_low'] = np.where(df['low'] != 0, df['high'] / df['low'], 1)
+    
+        # --- Additional Pairwise Features ---
+        feature_dict['volume_to_range_ratio'] = np.where(feature_dict['price_range'] != 0, df['volume'] / feature_dict['price_range'], 0)
+        feature_dict['range_to_mid_price_gap'] = feature_dict['price_range'] - feature_dict['mid_price_1']
+        feature_dict['mid_price_to_average_price_gap'] = feature_dict['mid_price_1'] - feature_dict['average_price']
 
-    # --- Price Gaps ---
-    feature_df['open_to_high_gap'] = df['high'] - df['open']
-    feature_df['close_to_low_gap'] = df['close'] - df['low']
-    feature_df['open_to_low_gap'] = df['open'] - df['low']
-    feature_df['close_to_high_gap'] = df['high'] - df['close']
+        # --- Lagged Features ---
+        for col in list(feature_dict.keys()):  # Use a snapshot of the keys
+            for lag in lags:
+                feature_dict[f'{col}_lag_{lag}'] = pd.Series(feature_dict[col]).shift(lag)
 
-    # --- Mid-Price Analysis ---
-    feature_df['mid_price_1'] = (df['high'] + df['low']) / 2
-    feature_df['mid_price_2'] = (df['open'] + df['close']) / 2
-    feature_df['mid_price_difference'] = feature_df['mid_price_1'] - feature_df['mid_price_2']
+        # --- Rolling Aggregations ---
+        for window in rolling_windows:
+            for col in list(feature_dict.keys()):  # Iterate over all factors in feature_dict
+                feature_dict[f'{col}_rolling_mean_{window}'] = pd.Series(feature_dict[col]).rolling(window).mean()
+                feature_dict[f'{col}_rolling_std_{window}'] = pd.Series(feature_dict[col]).rolling(window).std()
+                
+        # Convert feature_dict to a DataFrame
+        feature_df = pd.DataFrame(feature_dict, index=df.index)
 
-    # --- Skewness in Price Movement ---
-    feature_df['high_minus_mid_price_1'] = df['high'] - feature_df['mid_price_1']
-    feature_df['low_minus_mid_price_1'] = df['low'] - feature_df['mid_price_1']
-    feature_df['close_minus_mid_price_2'] = df['close'] - feature_df['mid_price_2']
-    feature_df['open_minus_mid_price_2'] = df['open'] - feature_df['mid_price_2']
+        # --- Handle Missing Values ---
+        if imputation_method == 'ffill':
+            feature_df.fillna(method='ffill', inplace=True)
+        elif imputation_method == 'interpolate':
+            feature_df.interpolate(method='linear', inplace=True)
+        else:  # Default to neutral values
+            feature_df.replace([np.inf, -np.inf], 0, inplace=True)
+            feature_df.fillna(0, inplace=True)
 
-    # --- Average Price Analysis ---
-    feature_df['average_price'] = (df['open'] + df['high'] + df['low'] + df['close']) / 4
-    feature_df['average_price_to_close_gap'] = feature_df['average_price'] - df['close']
-    feature_df['average_price_to_open_gap'] = feature_df['average_price'] - df['open']
+    except Exception as e:
+        logging.error(f"Error in generating pairwise operations: {e}")
+        return df  # Return the original DataFrame if an error occurs
 
-    # --- Range-Based Features ---
-    feature_df['price_range'] = df['high'] - df['low']
-    feature_df['range_to_open_gap'] = feature_df['price_range'] - (df['open'] - df['low'])
-    feature_df['range_to_close_gap'] = feature_df['price_range'] - (df['high'] - df['close'])
-
-    # --- Directional Skewness ---
-    feature_df['directional_skew_open'] = np.where(feature_df['price_range'] != 0, (df['open'] - df['low']) / feature_df['price_range'], 0)
-    feature_df['directional_skew_close'] = np.where(feature_df['price_range'] != 0, (df['close'] - df['low']) / feature_df['price_range'], 0)
-
-    # --- Relative Strength Indicators ---
-    feature_df['strength_open_vs_close'] = np.where(df['close'] != 0, df['open'] / df['close'], 1)
-    feature_df['strength_high_vs_low'] = np.where(df['low'] != 0, df['high'] / df['low'], 1)
-
-    # --- Additional Pairwise Features ---
-    feature_df['volume_to_range_ratio'] = np.where(feature_df['price_range'] != 0, df['volume'] / feature_df['price_range'], 0)
-    feature_df['range_to_mid_price_gap'] = feature_df['price_range'] - feature_df['mid_price_1']
-    feature_df['mid_price_to_average_price_gap'] = feature_df['mid_price_1'] - feature_df['average_price']
-
-    # --- Lagged Features ---
-    for lag in lags:
-        for col in feature_df.columns:
-            feature_df[f'{col}_lag_{lag}'] = feature_df[col].shift(lag)
-
-    # --- Rolling Aggregations ---
-    for window in rolling_windows:
-        for col in [
-            'open_to_high_gap', 'close_to_low_gap', 'mid_price_difference',
-            'high_minus_mid_price_1', 'low_minus_mid_price_1',
-            'average_price', 'price_range', 'directional_skew_open', 'strength_open_vs_close'
-        ]:
-            feature_df[f'{col}_rolling_mean_{window}'] = feature_df[col].rolling(window).mean()
-            feature_df[f'{col}_rolling_std_{window}'] = feature_df[col].rolling(window).std()
-
-    # --- Handle Missing Values ---
-    if imputation_method == 'ffill':
-        feature_df.fillna(method='ffill', inplace=True)
-    elif imputation_method == 'interpolate':
-        feature_df.interpolate(method='linear', inplace=True)
-    else:  # Default to neutral values
-        feature_df.replace([np.inf, -np.inf], 0, inplace=True)
-        feature_df.fillna(0, inplace=True)
-
-    # Merge features back into the original DataFrame
+    # Merge generated features back into the original DataFrame
     df = pd.concat([df, feature_df], axis=1)
 
     return df
@@ -231,44 +246,48 @@ def generate_rolling_statistics(df, windows=[3, 5, 8, 13, 21], imputation_method
     Returns:
         pd.DataFrame: DataFrame with additional rolling statistic features.
     """
-    # Temporary DataFrame for rolling features
-    rolling_df = pd.DataFrame(index=df.index)
+    feature_dict = {}  # Temporary dictionary to store rolling statistics
+
+    # Precompute rolling ranges to avoid redundant calculations
+    rolling_ranges = {window: (df['high'] - df['low']).rolling(window) for window in windows}
 
     # --- Rolling Mean (Price Trends) ---
     for window in windows:
-        rolling_df[f'rolling_mean_close_{window}'] = df['close'].rolling(window).mean()
-        rolling_df[f'rolling_mean_open_{window}'] = df['open'].rolling(window).mean()
-        rolling_df[f'rolling_mean_high_{window}'] = df['high'].rolling(window).mean()
-        rolling_df[f'rolling_mean_low_{window}'] = df['low'].rolling(window).mean()
-        rolling_df[f'rolling_mean_volume_{window}'] = df['volume'].rolling(window).mean()
+        feature_dict[f'rolling_mean_close_{window}'] = df['close'].rolling(window).mean()
+        feature_dict[f'rolling_mean_open_{window}'] = df['open'].rolling(window).mean()
+        feature_dict[f'rolling_mean_high_{window}'] = df['high'].rolling(window).mean()
+        feature_dict[f'rolling_mean_low_{window}'] = df['low'].rolling(window).mean()
+        feature_dict[f'rolling_mean_volume_{window}'] = df['volume'].rolling(window).mean()
 
     # --- Rolling Standard Deviation (Volatility) ---
     for window in windows:
-        rolling_df[f'rolling_std_close_{window}'] = df['close'].rolling(window).std()
-        rolling_df[f'rolling_std_open_{window}'] = df['open'].rolling(window).std()
-        rolling_df[f'rolling_std_high_{window}'] = df['high'].rolling(window).std()
-        rolling_df[f'rolling_std_low_{window}'] = df['low'].rolling(window).std()
-        rolling_df[f'rolling_std_volume_{window}'] = df['volume'].rolling(window).std()
+        feature_dict[f'rolling_std_close_{window}'] = df['close'].rolling(window).std()
+        feature_dict[f'rolling_std_open_{window}'] = df['open'].rolling(window).std()
+        feature_dict[f'rolling_std_high_{window}'] = df['high'].rolling(window).std()
+        feature_dict[f'rolling_std_low_{window}'] = df['low'].rolling(window).std()
+        feature_dict[f'rolling_std_volume_{window}'] = df['volume'].rolling(window).std()
 
     # --- Rolling Ranges ---
-    for window in windows:
-        rolling_range = (df['high'] - df['low']).rolling(window)
-        rolling_df[f'rolling_range_mean_{window}'] = rolling_range.mean()
-        rolling_df[f'rolling_range_std_{window}'] = rolling_range.std()
-        rolling_df[f'rolling_range_max_{window}'] = rolling_range.max()
-        rolling_df[f'rolling_range_min_{window}'] = rolling_range.min()
+    for window, rolling_range in rolling_ranges.items():
+        feature_dict[f'rolling_range_mean_{window}'] = rolling_range.mean()
+        feature_dict[f'rolling_range_std_{window}'] = rolling_range.std()
+        feature_dict[f'rolling_range_max_{window}'] = rolling_range.max()
+        feature_dict[f'rolling_range_min_{window}'] = rolling_range.min()
+
+    # Convert feature_dict to DataFrame
+    feature_df = pd.DataFrame(feature_dict, index=df.index)
 
     # --- Handle Missing Values ---
     if imputation_method == 'ffill':
-        rolling_df.fillna(method='ffill', inplace=True)
+        feature_df.fillna(method='ffill', inplace=True)
     elif imputation_method == 'interpolate':
-        rolling_df.interpolate(method='linear', inplace=True)
+        feature_df.interpolate(method='linear', inplace=True)
     else:  # Default to neutral values
-        rolling_df.replace([np.inf, -np.inf], 0, inplace=True)
-        rolling_df.fillna(0, inplace=True)
+        feature_df.replace([np.inf, -np.inf], 0, inplace=True)
+        feature_df.fillna(0, inplace=True)
 
     # Merge rolling features back into the original DataFrame
-    df = pd.concat([df, rolling_df], axis=1)
+    df = pd.concat([df, feature_df], axis=1)
 
     return df
 

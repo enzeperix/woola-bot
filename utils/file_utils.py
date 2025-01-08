@@ -122,3 +122,31 @@ def save_top_features_to_csv(df, input_csv_name):
     df.to_csv(output_path, index=False)
     print(f"Top features saved to: {output_path}")
     return output_path
+
+
+def convert_csv_to_parquet(csv_file_path):
+    """
+    Converts a CSV file to a Parquet file with the same name (replacing `.csv` with `.parquet`).
+    
+    Args:
+        csv_file_path (str): The path to the input CSV file.
+    
+    Returns:
+        str: The path to the generated Parquet file.
+    """
+    # Ensure the file exists
+    if not os.path.isfile(csv_file_path):
+        raise FileNotFoundError(f"CSV file not found: {csv_file_path}")
+
+    # Determine the Parquet file path
+    base_name = os.path.splitext(csv_file_path)[0]
+    parquet_file_path = f"{base_name}.parquet"
+
+    # Read the CSV and write to Parquet
+    try:
+        df = pd.read_csv(csv_file_path)
+        df.to_parquet(parquet_file_path, index=False)
+        print(f"Converted '{csv_file_path}' to '{parquet_file_path}'.")
+        return parquet_file_path
+    except Exception as e:
+        raise RuntimeError(f"Failed to convert CSV to Parquet: {e}")
