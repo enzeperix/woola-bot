@@ -4,7 +4,7 @@ import argparse
 import logging
 import pandas as pd
 from utils.file_utils import save_factors_to_csv
-from utils.factors_universe import (
+from utils.factors_utils import (
     calculate_mid_prices,
     generate_expanded_differences,
     generate_ratios,

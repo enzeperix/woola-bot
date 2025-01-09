@@ -5,8 +5,12 @@
 
   Suggestions to Improve Efficiency:
 Parallelize Data Preprocessing:
+Dask is the better choice for parallelism across multiple CPU cores.
+Given your hardware (i7-12850HX, 64 GB RAM), Dask can partition your dataset and parallelize correlation computation efficiently across all cores.
+Dask-CuDF for GPU (optional):
+If you have an NVIDIA GPU and want to utilize it, you could install dask-cudf (part of NVIDIA’s RAPIDS ecosystem).
+GPU acceleration is typically beneficial for datasets larger than 100,000 rows. For your dataset (~27K rows), the overhead of transferring data to the GPU may negate the benefits.
 
-Use libraries like Dask or Vaex for faster dataframe manipulation.
 For lagged feature creation and other heavy operations, leverage multi-threaded or multi-core processing.
 For large datasets, lagged operations can be slow. If performance becomes an issue, consider using libraries like Numba or Dask for faster computation.
 Optimize Feature Engineering:
