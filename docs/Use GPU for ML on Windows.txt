@@ -1,0 +1,23 @@
+On native Windows PyTorch paltform is recommended. TensorFlow has limited support and works better on Linux
+- First install VisualStudio community edition.
+- Check the divers versions and nvidia cuda driver version. Run in PowerShell:
+nvidia-smi
+Sun Jan 19 00:57:32 2025       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 538.78                 Driver Version: 538.78       CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                     TCC/WDDM  | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA RTX A2000 8GB Lap...  WDDM  | 00000000:01:00.0  On |                  N/A |
+| N/A   45C    P5               8W /  65W |   2041MiB /  8192MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+
+- If you have Nvidia CUDA Driver 12.2 , install NVIDIA CUDA Toolkit 12.1 which is compatible with Python 3.12 and
+your current CUDA Driver.
+- Got you the project folder and in PowerShell console activate the venv:
+PS C:\Users\adr\woola-bot> .\venv_pytorch\Scripts\activate
+ - Then run this command :
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
