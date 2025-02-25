@@ -1,5 +1,6 @@
-# Ignore the data directory
+# Ignore the data and directory
 data/
+workdir/
 # Ignore virtual environments
 venv*/
 .env/
