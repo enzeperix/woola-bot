@@ -36,21 +36,21 @@ def generate_factors_universe(input_csv):
         df = calculate_mid_prices(df)
 
         # Step 2: Generate Simple Differences
-        logging.info("Step 2: Generating expanded differences.")
-        df = generate_expanded_differences(df)
+#        logging.info("Step 2: Generating expanded differences.")
+#        df = generate_expanded_differences(df)
 
         # Step 3: Generate Ratios
-        logging.info("Step 3: Generating ratios.")
-        df = generate_ratios(df)
-
-        # Step 4: Generate Pairwise Operations
+#        logging.info("Step 3: Generating ratios.")
+#        df = generate_ratios(df)
+#
+#        # Step 4: Generate Pairwise Operations
         logging.info("Step 4: Generating pairwise operations.")
         df = generate_pairwise_operations(df)
-
-        # Step 5: Generate Rolling Statistics
-        logging.info("Step 5: Generating rolling statistics.")
-        df = generate_rolling_statistics(df)
-
+#
+#        # Step 5: Generate Rolling Statistics
+#        logging.info("Step 5: Generating rolling statistics.")
+#        df = generate_rolling_statistics(df)
+#
         # Save the generated factors universe
         logging.info("Step 6: Saving the factors universe to a CSV file.")
         save_factors_to_csv(df, input_csv)

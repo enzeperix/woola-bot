@@ -23,7 +23,7 @@ def generate_expanded_differences(df, lags=[1, 2, 3, 5, 8]):
     Args:
         df (pd.DataFrame): DataFrame containing OHLCV data.
         lags (list): List of lag values for generating lagged differences.
-        With 5 lags the function will generate a total of 92 features ( 2 static differences + 90 lagged differences).
+        With 5 lags the function will generate a total of 102 features ( 2 static differences + 100 lagged differences).
     Returns:
         pd.DataFrame: DataFrame with additional expanded difference factors.
     """

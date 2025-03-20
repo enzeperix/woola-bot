@@ -8,7 +8,7 @@ scikit-learn
 # On native Windows environments (not WSL, just native Windows) the support for GPU acceleration ended at tensorflow 2.10 which needs Python 3.10
 # So a venv with python 3.10 must be created.
 # tensorflow==2.10.0
-pytorch
+# pytorch
 logging
 pyarrow
 fastparquet
