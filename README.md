@@ -50,4 +50,12 @@ Data has the following OHLCV format :
 
 column1                            column2           column3             column4           column5         column6
 Time yyyy.MM.dd（UTC+3）            Open price       Highest price       Lowest price      Close price     Trade volume
+
+
+NOTES:
+
+-  On native Windows environments (not WSL, just native Windows) the support for GPU acceleration ended at tensorflow 2.10.0 which needs Python 3.10
+   So a venv with python 3.10 must be created.
+
+- Keep  pytorch and tensorflow out of requirements.txt, install them manually per machine.
                                    
