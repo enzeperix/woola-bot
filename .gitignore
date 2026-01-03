@@ -4,7 +4,7 @@ workdir/
 # Ignore virtual environments
 venv*/
 .env/
-woola_bot_env/
+venv_woola/
 # Ignore logs
 logs/
 # Ignore Python bytecode files
