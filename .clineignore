@@ -1,0 +1,7 @@
+venv_woola/
+.git/
+data/
+*.csv
+*.parquet
+__pycache__/
+.ipynb_checkpoints/
